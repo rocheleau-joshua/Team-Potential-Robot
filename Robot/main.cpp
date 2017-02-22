@@ -22,6 +22,12 @@
 #define COUNT_RATIO 33.7408479355
 #define COUNTS_PER_DEGREE 2.09055555556
 
+#define MIMIMUM_POWER 15
+
+#define POWER_RATIO 1.4
+#define DEGREE_RATIO 1.02
+
+
 int commands[] = {WAIT_FOR_LIGHT};
 
 FEHMotor right_motor(FEHMotor::Motor0, 12.0);
@@ -82,6 +88,8 @@ float go_to(float x_target, float y_target, float precision)
 
 void encoder_drive(float distance, float percent)
 {
+    percent *= POWER_RATIO;
+
     int counts = distance * COUNT_RATIO;
 
     right_encoder.ResetCounts();
@@ -93,18 +101,20 @@ void encoder_drive(float distance, float percent)
         int right_counts = right_encoder.Counts();
         int left_counts = left_encoder.Counts();
         current_counts = (left_counts + right_counts) / 2.;
-        float percent_complete = current_counts / counts;
+        float percent_complete = (float) current_counts / counts;
         float power_multiplier = exp(-(3*percent_complete-1)*(3*percent_complete-1));
         float power = power_multiplier * percent;
 
-        if (power < 10 && power > 0)
+        if (power < MIMIMUM_POWER && power > 0)
         {
-            power = 10;
+            power = MIMIMUM_POWER;
         }
-        if (power > -10 && power < 0)
+        if (power > -MIMIMUM_POWER && power < 0)
         {
-            power = -10;
+            power = -MIMIMUM_POWER;
         }
+
+        power = percent;
 
         LCD.WriteLine(power);
 
@@ -133,6 +143,9 @@ void encoder_drive(float distance, float percent)
 
 void encoder_turn_in_place(float degrees, float percent)
 {
+    percent *= POWER_RATIO;
+    degrees *= DEGREE_RATIO;
+
     float counts = COUNTS_PER_DEGREE * degrees;
     if (counts < 0)
     {
@@ -149,17 +162,19 @@ void encoder_turn_in_place(float degrees, float percent)
         int left_counts = left_encoder.Counts();
         current_counts = (left_counts + right_counts) / 2.;
 
-        float percent_complete = current_counts / counts;
+        float percent_complete = (float) current_counts / counts;
         float power_multiplier = exp(-(3*percent_complete-1)*(3*percent_complete-1));
         float power = power_multiplier * percent;
-        if (power < 10 && power > 0)
+        if (power < MIMIMUM_POWER && power > 0)
         {
-            power = 10;
+            power = MIMIMUM_POWER;
         }
-        if (power > -10 && power < 0)
+        if (power > -MIMIMUM_POWER && power < 0)
         {
-            power = -10;
+            power = -MIMIMUM_POWER;
         }
+
+        power = percent;
 
         if (degrees < 0)
         {
@@ -194,10 +209,12 @@ int main(void)
 {
     // Initialize RPS setup process.
     //RPS.InitializeTouchMenu();
+    LCD.Clear();
 
     // Wait until the screen is touched.
     float x, y;
     while (!LCD.Touch(&x, &y));
+    while (LCD.Touch(&x, &y));
 
     /*drive_backward(-20,.5);
     drive_backward(-50,.5);
@@ -205,11 +222,65 @@ int main(void)
     right_motor.Stop();
     left_motor.Stop();*/
 
-    encoder_drive(24, 100);
-    Sleep(1);
-    encoder_turn_in_place(90, 50);
-    Sleep(1);
-    encoder_drive(12, 100);
+    LCD.WriteLine("Start!");
+
+    Sleep(1.0);
+
+    LCD.WriteLine("Waiting ...");
+
+    float previous_cds_value = cds_cell.Value();
+    while(previous_cds_value - cds_cell.Value() < 0.3)
+    {
+        previous_cds_value = cds_cell.Value();
+        Sleep(.2);
+    }
+
+    encoder_drive(10, -20);
+    Sleep(1.0);
+    encoder_turn_in_place(-90, 20);
+    Sleep(1.0);
+    encoder_drive(13, -20);
+    Sleep(1.0);
+    encoder_turn_in_place(-95, 20);
+    Sleep(2.0);
+    encoder_drive(5, -30);
+    encoder_drive(5, -40);
+    encoder_drive(10, -50);
+    encoder_drive(5, -40);
+    encoder_drive(5, -20);
+    Sleep(1.0);
+    encoder_turn_in_place(60, 20);
+    Sleep(1.0);
+    encoder_drive(15, -35);
+    Sleep(1.0);
+    encoder_drive(5, 15);
+    Sleep(1.0);
+    encoder_turn_in_place(-90, 20);
+    Sleep(1.0);
+    encoder_drive(12, -20);
+    Sleep(1.0);
+    encoder_turn_in_place(90, 20);
+    Sleep(1.0);
+    encoder_drive(15, -25);
+    Sleep(1.0);
+    encoder_drive(5, 15);
+    Sleep(1.0);
+    encoder_turn_in_place(-90, 20);
+    Sleep(1.0);
+    encoder_drive(30, -20);
+    right_motor.SetPercent(20);
+    left_motor.SetPercent(-20);
+    Sleep(6.0);
+    right_motor.Stop();
+    left_motor.Stop();
+    Sleep(1.0);
+    encoder_drive(16, 20);
+    Sleep(1.0);
+    encoder_turn_in_place(-90, 20);
+    Sleep(1.0);
+    encoder_drive(40, -20);
+
+
 
     return 0;
 }
