@@ -24,8 +24,8 @@
 
 #define MIMIMUM_POWER 15
 
-#define POWER_RATIO 1.4
-#define DEGREE_RATIO 1.02
+#define POWER_RATIO 1
+#define DEGREE_RATIO 1
 
 
 int commands[] = {WAIT_FOR_LIGHT};
@@ -241,23 +241,10 @@ int main(void)
     Sleep(1.0);
     encoder_drive(13, -20);
     Sleep(1.0);
-    encoder_turn_in_place(-95, 20);
+    encoder_turn_in_place(-92, 20);
     Sleep(2.0);
-    encoder_drive(5, -30);
-    encoder_drive(5, -40);
-    encoder_drive(10, -50);
-    encoder_drive(5, -40);
-    encoder_drive(5, -20);
-    Sleep(1.0);
-    encoder_turn_in_place(60, 20);
-    Sleep(1.0);
-    encoder_drive(15, -35);
-    Sleep(1.0);
-    encoder_drive(5, 15);
-    Sleep(1.0);
-    encoder_turn_in_place(-90, 20);
-    Sleep(1.0);
-    encoder_drive(12, -20);
+    // Drive up ramp
+    encoder_drive(28, -40);
     Sleep(1.0);
     encoder_turn_in_place(90, 20);
     Sleep(1.0);
@@ -267,10 +254,10 @@ int main(void)
     Sleep(1.0);
     encoder_turn_in_place(-90, 20);
     Sleep(1.0);
-    encoder_drive(30, -20);
-    right_motor.SetPercent(20);
-    left_motor.SetPercent(-20);
-    Sleep(6.0);
+    encoder_drive(15, -30);
+    right_motor.SetPercent(40);
+    left_motor.SetPercent(-40);
+    Sleep(7.0);
     right_motor.Stop();
     left_motor.Stop();
     Sleep(1.0);
