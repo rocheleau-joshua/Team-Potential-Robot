@@ -1,6 +1,6 @@
-PING google.com (172.217.0.14): 56 data bytes
-64 bytes from 172.217.0.14: icmp_seq=0 ttl=51 time=16.003 ms
+PING google.com (216.58.192.174): 56 data bytes
+64 bytes from 216.58.192.174: icmp_seq=0 ttl=51 time=15.170 ms
 
 --- google.com ping statistics ---
 1 packets transmitted, 1 packets received, 0.0% packet loss
-round-trip min/avg/max/stddev = 16.003/16.003/16.003/0.000 ms
+round-trip min/avg/max/stddev = 15.170/15.170/15.170/0.000 ms
