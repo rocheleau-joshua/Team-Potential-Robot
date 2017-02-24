@@ -254,7 +254,7 @@ int main(void)
     Sleep(1.0);
     encoder_turn_in_place(-90, 20);
     Sleep(1.0);
-    encoder_drive(15, -30);
+    encoder_drive(15, -40);
     right_motor.SetPercent(40);
     left_motor.SetPercent(-40);
     Sleep(7.0);
