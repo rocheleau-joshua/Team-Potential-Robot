@@ -1,10 +1,16 @@
-#include <FEHLCD.h>
-#include <FEHIO.h>
 #include <FEHUtility.h>
+#include <FEHLCD.h>
+#include <FEHSD.h>
 #include <FEHMotor.h>
 #include <FEHServo.h>
+#include <FEHIO.h>
 #include <FEHRPS.h>
+
 #include <math.h>
+
+#include "worldstate.h"
+
+using namespace std;
 
 #define SERVOMIN 500
 #define SERVOMAX 2286
@@ -26,7 +32,6 @@
 
 #define POWER_RATIO 1.4
 #define DEGREE_RATIO 1.02
-
 
 int commands[] = {WAIT_FOR_LIGHT};
 
@@ -205,82 +210,55 @@ void encoder_turn_in_place(float degrees, float percent)
 }
 
 
+DigitalInputPin SideBumper(FEHIO::P1_4);
+DigitalInputPin ArmBumper(FEHIO::P1_5);
+
 int main(void)
 {
-    // Initialize RPS setup process.
-    //RPS.InitializeTouchMenu();
-    LCD.Clear();
+    int adsadasdasdads;
 
-    // Wait until the screen is touched.
-    float x, y;
-    while (!LCD.Touch(&x, &y));
-    while (LCD.Touch(&x, &y));
+    LCD.SetBackgroundColor(BLACK);
+    LCD.SetFontColor(WHITE);
 
-    /*drive_backward(-20,.5);
-    drive_backward(-50,.5);
-    drive_backward(-70,3);
-    right_motor.Stop();
-    left_motor.Stop();*/
+    LCD.WriteLine("WORLD STATE REPORTER TEST");
+    LCD.WriteLine("Creating WorldState object...");
+    WorldState ws(right_encoder, left_encoder, front_right_bumper, front_left_bumper, back_right_bumper, back_left_bumper, SideBumper, ArmBumper, cds_cell);
 
-    LCD.WriteLine("Start!");
+    LCD.WriteLine("Running startup selfcheck...");
+    bool checkResult = ws.SelfCheck(0, 0, true, true, true, true, true, true, 0.0, 3.3);
 
-    Sleep(1.0);
-
-    LCD.WriteLine("Waiting ...");
-
-    float previous_cds_value = cds_cell.Value();
-    while(previous_cds_value - cds_cell.Value() < 0.3)
-    {
-        previous_cds_value = cds_cell.Value();
-        Sleep(.2);
+    if (checkResult) {
+        LCD.WriteLine("Selfcheck passed!");
+        Sleep(2000);
+    } else {
+        LCD.WriteLine("Selfcheck failed!");
+        Sleep(2000);
     }
 
-    encoder_drive(10, -20);
-    Sleep(1.0);
-    encoder_turn_in_place(-90, 20);
-    Sleep(1.0);
-    encoder_drive(13, -20);
-    Sleep(1.0);
-    encoder_turn_in_place(-95, 20);
-    Sleep(2.0);
-    encoder_drive(5, -30);
-    encoder_drive(5, -40);
-    encoder_drive(10, -50);
-    encoder_drive(5, -40);
-    encoder_drive(5, -20);
-    Sleep(1.0);
-    encoder_turn_in_place(60, 20);
-    Sleep(1.0);
-    encoder_drive(15, -35);
-    Sleep(1.0);
-    encoder_drive(5, 15);
-    Sleep(1.0);
-    encoder_turn_in_place(-90, 20);
-    Sleep(1.0);
-    encoder_drive(12, -20);
-    Sleep(1.0);
-    encoder_turn_in_place(90, 20);
-    Sleep(1.0);
-    encoder_drive(15, -25);
-    Sleep(1.0);
-    encoder_drive(5, 15);
-    Sleep(1.0);
-    encoder_turn_in_place(-90, 20);
-    Sleep(1.0);
-    encoder_drive(30, -20);
-    right_motor.SetPercent(20);
-    left_motor.SetPercent(-20);
-    Sleep(6.0);
-    right_motor.Stop();
-    left_motor.Stop();
-    Sleep(1.0);
-    encoder_drive(16, 20);
-    Sleep(1.0);
-    encoder_turn_in_place(-90, 20);
-    Sleep(1.0);
-    encoder_drive(40, -20);
+    float x_pos, y_pos;
 
+    while (!LCD.Touch(&x_pos, &y_pos)) {
+        ws.LogReport(true);
+        Sleep(100);
+        LCD.Clear();
+    }
 
+    LCD.WriteLine("Running shutdown selfcheck");
+    checkResult = ws.SelfCheck(0, 0, true, true, true, true, true, true, 0.0, 3.3);
+
+    if (checkResult) {
+        LCD.WriteLine("Selfcheck passed!");
+        Sleep(2000);
+    } else {
+        LCD.WriteLine("Selfcheck failed!");
+        Sleep(2000);
+    }
+
+    LCD.WriteLine("Closing log...");
+    SD.CloseLog();
+    LCD.WriteLine("Log closed");
 
     return 0;
 }
+
+

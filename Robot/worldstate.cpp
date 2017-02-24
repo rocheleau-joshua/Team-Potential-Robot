@@ -1,7 +1,6 @@
 #include <FEHUtility.h>
 #include <FEHLCD.h>
 #include <FEHSD.h>
-#include <FEHIO.h>
 #include <FEHRPS.h>
 #include <FEHBuzzer.h>
 
