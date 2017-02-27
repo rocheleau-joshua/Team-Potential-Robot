@@ -5,6 +5,8 @@
 #include <FEHServo.h>
 #include <FEHRPS.h>
 #include <math.h>
+#include <task.h>
+#include <drive.h>
 
 #define SERVOMIN 500
 #define SERVOMAX 2286
@@ -216,6 +218,19 @@ int main(void)
     while (!LCD.Touch(&x, &y));
     while (LCD.Touch(&x, &y));
 
+    /*while (true)
+    {
+        LCD.WriteLine(cds_cell.Value());
+        Sleep(1.0);
+    }*/
+
+
+    Task* array[] = { new Drive(1), new Drive(2)};
+
+    array[0]->Run();
+    array[1]->Run();
+
+
     /*drive_backward(-20,.5);
     drive_backward(-50,.5);
     drive_backward(-70,3);
@@ -266,7 +281,6 @@ int main(void)
     encoder_turn_in_place(-90, 20);
     Sleep(1.0);
     encoder_drive(40, -20);
-
 
 
     return 0;

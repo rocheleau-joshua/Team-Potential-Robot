@@ -26,7 +26,8 @@
  C:\fehqt\Proteus/EWL/EWL_C/include/math_config.h \
  C:\fehqt\Proteus/EWL/EWL_C/include/arm/math.ARM.h \
  C:\fehqt\Proteus/EWL/EWL_C/include/cerrno \
- C:\fehqt\Proteus/EWL/EWL_C/include/math_integral.h
+ C:\fehqt\Proteus/EWL/EWL_C/include/math_integral.h ../task.h ../drive.h \
+ ../task.h
 
 C:\fehqt\Proteus/EWL/EWL_C++/include/lib_ewl_c++.prefix:
 
@@ -101,3 +102,9 @@ C:\fehqt\Proteus/EWL/EWL_C/include/arm/math.ARM.h:
 C:\fehqt\Proteus/EWL/EWL_C/include/cerrno:
 
 C:\fehqt\Proteus/EWL/EWL_C/include/math_integral.h:
+
+../task.h:
+
+../drive.h:
+
+../task.h:
