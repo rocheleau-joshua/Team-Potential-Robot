@@ -218,6 +218,33 @@ int main(void)
     while (!LCD.Touch(&x, &y));
     while (LCD.Touch(&x, &y));
 
+    Sleep(1.0);
+    servo.SetDegree(80);
+    Sleep(1.0);
+    encoder_drive(10,20);
+    Sleep(1.0);
+    encoder_drive(10,-20);
+    Sleep(1.0);
+    servo.SetDegree(170);
+    Sleep(1.0);
+
+    // Wait until the screen is touched.
+    while (!LCD.Touch(&x, &y));
+    while (LCD.Touch(&x, &y));
+
+    Sleep(1.0);
+    encoder_drive(10,20);
+    Sleep(1.0);
+    servo.SetDegree(80);
+    Sleep(1.0);
+    encoder_drive(10,-40);
+    Sleep(1.0);
+    servo.SetDegree(170);
+    Sleep(1.0);
+
+    // Wait until the screen is touched.
+    while (!LCD.Touch(&x, &y));
+    while (LCD.Touch(&x, &y));
 
     LCD.WriteLine("Start!");
 
