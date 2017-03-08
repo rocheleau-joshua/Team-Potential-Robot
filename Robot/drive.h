@@ -2,15 +2,19 @@
 #define DRIVE_H
 
 #include <FEHLCD.h>
+#include <FEHMotor.h>
 #include "task.h"
 
 class Drive : public Task
 {
 public:
-    Drive(int);
-    bool Run();
+    Drive(float, float);
+    void Init(Robot& robot);
+    bool Run(Robot& robot);
+    void Finish(Robot& robot);
+    bool isEnd();
 private:
-    int test_number;
+    float X, Y;
 };
 
 #endif // DRIVE_H
