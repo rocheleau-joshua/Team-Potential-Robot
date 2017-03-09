@@ -1,0 +1,214 @@
+// This program is far from complete but the basics are ready for testing. Navigation is based on 
+// the principle that the ability to drive straight is above all else, thus the main purpose of this 
+// program is to calibrate the motors to drive straight. Once calibrated the robot uses RPS and a 
+// set destination to calculate the distance to travel. The robot then uses its heading and the 
+// desired heading to align itself to within 1.5 degrees. The robot uses the distanced to travel 
+// and drives the motors straight for half the distance. Hopefully, with good alignment and 
+// driving straight the robot should perform well. After traveling half the distance the robot will 
+// recalculate and cut the distance in half again, then repeat the process a third time.
+
+//Further work:
+// 1)	Use encoders to cross-reference distance traveled
+// 2)	Upgrade orientation function if needed
+// 3)	Tests for additional parameters for driving straight to allow for different motor speeds
+// 4)	Incorporate light sensor color testing
+// 5)	Adapt current code into this one to allow for completion of tasks
+// 6)	Add line-follow function
+ 
+#include <FEHLCD.h>
+#include <FEHIO.h>
+#include <FEHUtility.h>
+#include <FEHMotor.h>
+#include <FEHRPS.h>
+#include <math.h>
+
+#define CDSMIN 0.0
+#define CDSMAX 3.3
+#define PERCENT 15
+#define MOTOR_RATIO 1 //hopefully ratio will be replaced with this later
+#define DISTANCE 12 //hopefully set_distance will be replaced with this later
+#define ITERATE 3 //half distance to travel
+
+FEHMotor right_motor(FEHMotor::Motor3, 12.0);
+FEHMotor left_motor(FEHMotor::Motor0, 12.0);
+
+DigitalInputPin CDSCell(FEHIO::P1_6);	
+DigitalInputPin BRbumper(FEHIO::P2_4);
+DigitalInputPin BLbumper(FEHIO::P2_2);
+DigitalInputPin FRbumper(FEHIO::P2_6);
+DigitalInputPin CAbumper(FEHIO::P3_0);
+
+// function to drive forward passes ratio for calibration and uses TT to estimate distance
+void drive_forward(int ratio, int TT) 
+{
+	right_motor.SetPercent(PERCENT * ratio); //right motor will be calibrated for the left
+	left_motor.SetPercent(PERCENT);
+	sleep(TT); //will determine distance traveled
+	right_motor.Stop();
+	left_motor.Stop();
+}
+
+void DisRatio(float ratio); // display for calibration, with value and instructions
+{
+	LCD.Clear();
+  LCD.Write ("ratio is set to:");
+  LCD.Writeline (ratio);
+LCD.Writeline(“”);
+LCD.Writeline(" ( + 0.05 )  =  right button");
+LCD.Writeline(" ( - 0.05 )  =  left button");
+LCD.Writeline(“”);
+LCD.Writeline(“press screen to test”);
+LCD.Writeline(“or press core button to save ratio”);
+}
+
+void DisDistance(float set_distance); // display for calibration, with value and instructions
+{
+	LCD.Clear();
+LCD.Write ("distance traveled:");
+LCD.Writeline (set_distance);
+LCD.Writeline(“”);
+LCD.Writeline(" ( + 0.02 )  =  right button");
+LCD.Writeline(" ( - 0.02 )  =  left button");
+LCD.Writeline(“”);
+LCD.Writeline(“or press core button to save distance and begin run”);
+}
+
+//uses RPS to calculate distance to travel	
+float distance(float x_target, float y_target)
+{
+	float x = RPS.X();
+	float y = RPS.Y();
+	return pow( (pow(x - x_target, 2) + pow(y - y_target, 2) ), 0.5);
+}
+
+// correct the orientation of the robot, adapted from existing code of unknown worth
+void orient_me(float x_target, float y_target);
+{
+	float x = RPS.X();
+	float y = RPS.Y();
+	desired_heading = atan2((x - x_target, 2), (y - y_target, 2));
+	if (desired_heading <= -180)
+	{
+		desired_heading += 360;
+	}
+
+	float heading_difference = desired_heading - RPS.GetHeading();
+	if (heading_difference > 180)
+	{
+		heading_difference -= 360;
+	}
+	if (heading_difference <= -180)
+	{
+		heading_difference += 360;
+	}
+	while(heading_difference < -1.5 || heading_difference > 1.5)
+	{
+		if (heading_difference < -1.5)
+		{
+			right_motor.SetPercent(-PERCENT * ratio); 
+			left_motor.SetPercent(PERCENT);
+		}
+		else if (heading_difference > 1.5)
+		{
+			right_motor.SetPercent(PERCENT * ratio); 
+			left_motor.SetPercent(-PERCENT);
+		}
+	}
+	right_motor.Stop();
+	left_motor.Stop();
+}
+
+//function of functions to guide robot to destination with repeated checks
+void go_to(float xFunc, float yFunc);
+{
+LCD.Clear();
+LCD.Write(“set to x = ”); LCD.Write(x); LCD.Write(“and y = ”); LCD.Writeline(y);
+
+	for(float count = 1; count =< ITERATE; count++)
+	{
+		LCD.Write(count); LCD.WriteLine(“ iteration”);
+float Delta_dis = distance(xFunc, yFunc);
+orient_me(xFunc, yFunc);
+drive_forward(ratio, (distance / coeffA)/2) ;
+	}
+}
+
+//and now the main function
+int main(void)
+{
+// Initialize RPS setup process and set other values
+RPS.InitializeTouchMenu();
+float x, y; //used for screen touch
+float ratio = MOTOR_RATIO;
+set_distance = DISTANCE;
+LCD.Clear(BLUE);
+
+	// calibrate motor power ratio
+	while (CAbumper != 1);
+	{
+while (!LCD.Touch(&x, &y)); // Wait until the screen is touched
+{
+			DisRatio(ratio);
+			if BRbumper = 1;
+			{
+				ratio = ratio + 0.05;
+}
+			if BLbumper = 1;
+			{
+				ratio = ratio - 0.05;
+}
+sleep(0.5)
+}
+	drive_forward(ratio, 2.0);
+	}
+
+	//enter distanced traveled
+	while (CAbumper != 1);
+	{
+		DisDistance(set_distance);
+		if BRbumper = 1;
+		{
+			set_distance = set_distance + 0.02;
+}	
+		if BLbumper = 1;
+		{
+			set_distance = set_distance - 0.02;
+}
+sleep(0.5)
+}// end distance entry
+
+//determine coeffects for each motor
+float coeffA = set_distance / (PERCENT * 2);
+// time for any distance is now (distance / coeffA) = time
+
+//everything up to this can be removed from the main program and into a calibrate program
+
+//screen output, because why not
+LCD.Clear(RED);
+LCD.Write(“beginning run”);
+LCD.Write(“”);
+LCD.Write(“waiting for light”);
+
+//wait for start light
+float previous_cds_value = CDSCell.Value();
+while(previous_cds_value - CDSCell.Value() < 0.3)
+{
+previous_cds_value = cds_cell.Value();
+//changes screen while waiting
+LCD.Clear(BLUE);
+LCD.Write(“waiting for light”);
+       	Sleep(.1);
+LCD.Clear(RED);
+LCD.Write(“waiting for light”);
+       	Sleep(.1);
+}
+
+// go to a given destination and wait 4 seconds
+go_to(3, 5);
+sleep(4);
+go_to(4, 5);
+sleep(4);
+go_to(2, 3);
+sleep(4);
+go_to(3, 5);
+} //end main
